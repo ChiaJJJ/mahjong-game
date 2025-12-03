@@ -1,0 +1,94 @@
+# 河南麻将项目Git忽略文件
+
+# 编译输出
+target/
+dist/
+build/
+
+# IDE文件
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# 依赖目录
+node_modules/
+.pnp/
+.pnp.js
+
+# 测试覆盖率
+coverage/
+*.lcov
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+*.bak
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Spring Boot配置（包含敏感信息）
+application-dev.yml
+application-test.yml
+application-prod.yml
+
+# Maven本地仓库
+.m2/
+
+# npm调试日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vite
+.vite/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vue.js build output
+dist/
+
+# TypeScript
+*.tsbuildinfo
+
+# 系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

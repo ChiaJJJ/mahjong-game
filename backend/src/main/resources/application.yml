@@ -1,0 +1,227 @@
+# 河南麻将游戏应用配置
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # 数据库配置
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/mahjong_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: ${JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: false
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  # Redis配置
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # Web配置
+  web:
+    resources:
+      static-locations: classpath:/static/,classpath:/public/
+
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# 应用配置
+server:
+  port: ${SERVER_PORT:9980}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+  http2:
+    enabled: true
+
+# WebSocket配置
+websocket:
+  port: ${WEBSOCKET_PORT:9914}
+
+# MyBatis配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.mahjong.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    lazy-loading-enabled: true
+    multiple-result-sets-enabled: true
+    use-column-label: true
+    use-generated-keys: true
+    auto-mapping-behavior: partial
+    auto-mapping-unknown-column-behavior: warning
+    default-executor-type: reuse
+    default-statement-timeout: 25
+    default-fetch-size: 100
+    safe-row-bounds-enabled: false
+    map-nested-result-maps-for-single-result: false
+    local-cache-scope: session
+    jdbc-type-for-null: other
+
+# 日志配置
+logging:
+  level:
+    com.mahjong: ${LOG_LEVEL:DEBUG}
+    org.springframework.web: INFO
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    com.corundumstudio.socketio: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# OpenAPI文档配置
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+# 游戏配置
+game:
+  # 房间配置
+  room:
+    max-players: 4
+    max-spectators: 50
+    idle-timeout: 3600000  # 1小时
+    cleanup-interval: 300000  # 5分钟
+
+  # 游戏配置
+  default-think-time: 30  # 默认思考时间（秒）
+  max-think-time: 60     # 最大思考时间（秒）
+  auto-disard: false     # 是否自动出牌
+
+  # WebSocket配置
+  websocket:
+    heartbeat-interval: 25000  # 心跳间隔（毫秒）
+    connection-timeout: 60000  # 连接超时（毫秒）
+    max-reconnect-attempts: 5   # 最大重连次数
+
+---
+# 开发环境配置
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/mahjong_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+logging:
+  level:
+    com.mahjong: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+
+---
+# 生产环境配置
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 10
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate
+
+logging:
+  level:
+    com.mahjong: INFO
+    org.springframework.web: WARN
+  file:
+    name: /var/log/mahjong/application.log
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
+
+game:
+  room:
+    max-players: 4
+    max-spectators: 100
+  websocket:
+    connection-timeout: 30000
