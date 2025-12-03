@@ -67,14 +67,14 @@ public class PlayerRound {
     /**
      * 是否为胜者
      */
-    @Column(name = "is_winner", nullable = false)
-    private Boolean isWinner = false;
+    @Column(name = "winner", nullable = false)
+    private Boolean winner = false;
 
     /**
      * 是否为庄家
      */
-    @Column(name = "is_dealer", nullable = false)
-    private Boolean isDealer = false;
+    @Column(name = "dealer", nullable = false)
+    private Boolean dealer = false;
 
     /**
      * 得分

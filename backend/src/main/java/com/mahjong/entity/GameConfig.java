@@ -143,14 +143,14 @@ public class GameConfig {
     /**
      * 是否为默认配置
      */
-    @Column(name = "is_default", nullable = false)
-    private Boolean isDefault = false;
+    @Column(name = "default", nullable = false)
+    private Boolean default = false;
 
     /**
      * 是否启用
      */
-    @Column(name = "is_enabled", nullable = false)
-    private Boolean isEnabled = true;
+    @Column(name = "enabled", nullable = false)
+    private Boolean enabled = true;
 
     /**
      * 创建者ID

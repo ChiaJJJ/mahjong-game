@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS players (
     player_avatar VARCHAR(200) DEFAULT '' COMMENT '玩家头像URL',
     player_position TINYINT NOT NULL COMMENT '玩家位置(1-4)',
     player_status ENUM('ONLINE', 'OFFLINE', 'READY', 'PLAYING') DEFAULT 'ONLINE' COMMENT '玩家状态',
-    is_spectator BOOLEAN DEFAULT FALSE COMMENT '是否为观战者',
+    spectator BOOLEAN DEFAULT FALSE COMMENT '是否为观战者',
     total_score INT DEFAULT 0 COMMENT '总分数',
     wins_count INT DEFAULT 0 COMMENT '获胜次数',
     ready_at TIMESTAMP NULL COMMENT '准备时间',
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS player_hands (
     discard_count TINYINT DEFAULT 0 COMMENT '出牌次数',
     claim_count TINYINT DEFAULT 0 COMMENT '吃碰杠次数',
     score INT DEFAULT 0 COMMENT '本局得分',
-    is_winner BOOLEAN DEFAULT FALSE COMMENT '是否获胜',
+    winner BOOLEAN DEFAULT FALSE COMMENT '是否获胜',
     win_type ENUM('SELF_DRAWN', 'DISCARD', 'KONG', 'ROB') COMMENT '胡牌类型',
     winning_tiles JSON COMMENT '胡牌组合',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     message_type ENUM('TEXT', 'EMOJI', 'SYSTEM') DEFAULT 'TEXT' COMMENT '消息类型',
     message_content TEXT NOT NULL COMMENT '消息内容',
     player_name VARCHAR(20) COMMENT '发送者名称',
-    is_deleted BOOLEAN DEFAULT FALSE COMMENT '是否已删除',
+    deleted BOOLEAN DEFAULT FALSE COMMENT '是否已删除',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
 
     FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS online_users (
     connection_id VARCHAR(100) NOT NULL COMMENT 'WebSocket连接ID',
     ip_address VARCHAR(45) COMMENT 'IP地址',
     user_agent TEXT COMMENT '用户代理',
-    is_spectator BOOLEAN DEFAULT FALSE COMMENT '是否观战者',
+    spectator BOOLEAN DEFAULT FALSE COMMENT '是否观战者',
     last_heartbeat TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '最后心跳时间',
     connected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '连接时间',
 
@@ -271,8 +271,8 @@ SELECT
     r.spectator_count,
     r.created_at,
     r.updated_at,
-    (SELECT COUNT(*) FROM players p WHERE p.room_id = r.id AND p.is_spectator = FALSE) as actual_players,
-    (SELECT COUNT(*) FROM players p WHERE p.room_id = r.id AND p.is_spectator = TRUE) as actual_spectators,
+    (SELECT COUNT(*) FROM players p WHERE p.room_id = r.id AND p.spectator = FALSE) as actual_players,
+    (SELECT COUNT(*) FROM players p WHERE p.room_id = r.id AND p.spectator = TRUE) as actual_spectators,
     (SELECT COUNT(*) FROM players p WHERE p.room_id = r.id AND p.player_status = 'READY') as ready_players
 FROM rooms r;
 

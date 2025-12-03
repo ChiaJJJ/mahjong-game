@@ -89,14 +89,14 @@ public class ChatMessage {
     /**
      * 是否系统消息
      */
-    @Column(name = "is_system", nullable = false)
-    private Boolean isSystem = false;
+    @Column(name = "bool_system", nullable = false)
+    private Boolean boolSystem = false;
 
     /**
      * 是否已删除
      */
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
+    @Column(name = "deleted", nullable = false)
+    private Boolean deleted = false;
 
     /**
      * 创建时间
@@ -155,7 +155,7 @@ public class ChatMessage {
      * 检查是否为系统消息
      */
     public boolean isSystemMessage() {
-        return isSystem || messageType == MessageType.SYSTEM;
+        return boolSystem || messageType == MessageType.SYSTEM;
     }
 
     /**
@@ -183,14 +183,14 @@ public class ChatMessage {
      * 软删除消息
      */
     public void softDelete() {
-        this.isDeleted = true;
+        this.deleted = true;
     }
 
     /**
      * 检查消息是否已删除
      */
     public boolean isDeleted() {
-        return isDeleted;
+        return deleted;
     }
 
     /**
@@ -216,7 +216,7 @@ public class ChatMessage {
                 .senderName("系统")
                 .messageType(MessageType.SYSTEM)
                 .messageContent(content)
-                .isSystem(true)
+                .boolSystem(true)
                 .build();
     }
 

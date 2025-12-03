@@ -34,13 +34,13 @@ public interface PlayerRepository extends JpaRepository<Player, String> {
     /**
      * 查找房间内所有非观战玩家
      */
-    @Query("SELECT p FROM Player p WHERE p.room.id = :roomId AND p.isSpectator = false")
+    @Query("SELECT p FROM Player p WHERE p.room.id = :roomId AND p.spectator = false")
     List<Player> findActivePlayersByRoomId(@Param("roomId") Long roomId);
 
     /**
      * 查找房间内所有观战者
      */
-    @Query("SELECT p FROM Player p WHERE p.room.id = :roomId AND p.isSpectator = true")
+    @Query("SELECT p FROM Player p WHERE p.room.id = :roomId AND p.spectator = true")
     List<Player> findSpectatorsByRoomId(@Param("roomId") Long roomId);
 
     /**
@@ -57,7 +57,7 @@ public interface PlayerRepository extends JpaRepository<Player, String> {
     /**
      * 查找房间内非观战玩家数量
      */
-    @Query("SELECT COUNT(p) FROM Player p WHERE p.room.id = :roomId AND p.isSpectator = false")
+    @Query("SELECT COUNT(p) FROM Player p WHERE p.room.id = :roomId AND p.spectator = false")
     long countActivePlayersByRoomId(@Param("roomId") Long roomId);
 
     /**

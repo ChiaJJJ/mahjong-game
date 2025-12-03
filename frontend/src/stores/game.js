@@ -28,7 +28,7 @@ export const PlayerStatus = {
  * @property {string} avatar - 玩家头像
  * @property {number} position - 玩家位置(1-4)
  * @property {string} status - 玩家状态
- * @property {boolean} isSpectator - 是否观战者
+ * @property {boolean} spectator - 是否观战者
  * @property {number} totalScore - 总分数
  * @property {number} winsCount - 获胜次数
  * @property {boolean} isReady - 是否准备
@@ -89,11 +89,11 @@ export const useGameStore = defineStore('game', () => {
   })
 
   const roomPlayers = computed(() => {
-    return currentRoom.value?.players?.filter(player => !player.isSpectator) || []
+    return currentRoom.value?.players?.filter(player => !player.spectator) || []
   })
 
   const spectators = computed(() => {
-    return currentRoom.value?.players?.filter(player => player.isSpectator) || []
+    return currentRoom.value?.players?.filter(player => player.spectator) || []
   })
 
   // Actions

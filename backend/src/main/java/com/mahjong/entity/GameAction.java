@@ -130,14 +130,14 @@ public class GameAction {
     /**
      * 是否有效操作
      */
-    @Column(name = "is_valid", nullable = false)
-    private Boolean isValid = true;
+    @Column(name = "valid", nullable = false)
+    private Boolean valid = true;
 
     /**
      * 是否为AI操作
      */
-    @Column(name = "is_ai_action", nullable = false)
-    private Boolean isAiAction = false;
+    @Column(name = "ai_action", nullable = false)
+    private Boolean aiAction = false;
 
     /**
      * 操作结果
@@ -466,7 +466,7 @@ public class GameAction {
                 .playerPosition(playerPosition)
                 .actionType(actionType)
                 .actionContent(actionContent)
-                .isValid(true)
+                .valid(true)
                 .actionResult(ActionResult.SUCCESS)
                 .build();
     }
@@ -486,7 +486,7 @@ public class GameAction {
                 .roundNumber(gameRound != null ? gameRound.getRoundNumber() : 0)
                 .actionType(actionType)
                 .tileInfo(tileInfo)
-                .isValid(true)
+                .valid(true)
                 .actionResult(ActionResult.SUCCESS)
                 .build();
     }
@@ -505,7 +505,7 @@ public class GameAction {
                 .actionType(actionType)
                 .targetPlayerId(targetPlayerId)
                 .targetPlayerName(targetPlayerName)
-                .isValid(true)
+                .valid(true)
                 .actionResult(ActionResult.SUCCESS)
                 .build();
     }

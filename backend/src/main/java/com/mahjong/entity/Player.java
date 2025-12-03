@@ -78,8 +78,8 @@ public class Player {
     /**
      * 是否为观战者
      */
-    @Column(name = "is_spectator", nullable = false)
-    private Boolean isSpectator = false;
+    @Column(name = "spectator", nullable = false)
+    private Boolean spectator = false;
 
     /**
      * 总分数

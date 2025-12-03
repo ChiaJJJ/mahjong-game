@@ -89,7 +89,7 @@ public class RoomService {
                     .playerName(creatorName)
                     .playerPosition(1) // 创建者默认位置1
                     .playerStatus(Player.PlayerStatus.ONLINE)
-                    .isSpectator(false)
+                    .spectator(false)
                     .totalScore(0)
                     .winsCount(0)
                     .build();
@@ -115,11 +115,11 @@ public class RoomService {
      * @param roomNumber  房间号
      * @param playerId    玩家ID
      * @param playerName  玩家昵称
-     * @param isSpectator 是否为观战者
+     * @param spectator 是否为观战者
      * @return 加入结果
      */
     @Transactional
-    public ApiResponse<Room> joinRoom(String roomNumber, String playerId, String playerName, Boolean isSpectator) {
+    public ApiResponse<Room> joinRoom(String roomNumber, String playerId, String playerName, Boolean spectator) {
         try {
             log.info("玩家尝试加入房间: 玩家={}, 房间号={}", playerName, roomNumber);
 
@@ -143,7 +143,7 @@ public class RoomService {
             }
 
             // 处理观战者加入
-            if (isSpectator != null && isSpectator) {
+            if (spectator != null && spectator) {
                 if (!room.allowsSpectate()) {
                     return ApiResponse.badRequest("此房间不允许观战");
                 }
@@ -154,7 +154,7 @@ public class RoomService {
                         .playerName(playerName)
                         .playerPosition(0) // 观战者位置为0
                         .playerStatus(Player.PlayerStatus.ONLINE)
-                        .isSpectator(true)
+                        .spectator(true)
                         .totalScore(0)
                         .winsCount(0)
                         .build();
@@ -186,7 +186,7 @@ public class RoomService {
                     .playerName(playerName)
                     .playerPosition(position)
                     .playerStatus(Player.PlayerStatus.ONLINE)
-                    .isSpectator(false)
+                    .spectator(false)
                     .totalScore(0)
                     .winsCount(0)
                     .build();
@@ -235,7 +235,7 @@ public class RoomService {
             Player player = playerOpt.get();
 
             // 如果是游戏中的玩家，不允许离开
-            if (!player.isSpectator() && room.getRoomStatus() == Room.RoomStatus.PLAYING) {
+                      if (!player.getSpectator() && room.getRoomStatus() == Room.RoomStatus.PLAYING) {
                 return ApiResponse.badRequest("游戏中无法离开房间");
             }
 
@@ -243,7 +243,7 @@ public class RoomService {
             playerRepository.delete(player);
 
             // 更新房间人数
-            if (player.isSpectator()) {
+            if (player.getSpectator()) {
                 room.decrementSpectatorCount();
             } else {
                 room.decrementPlayerCount();
@@ -337,7 +337,7 @@ public class RoomService {
 
             Player player = playerOpt.get();
 
-            if (player.isSpectator()) {
+            if (player.getSpectator()) {
                 return ApiResponse.badRequest("观战者无需准备");
             }
 
@@ -382,7 +382,7 @@ public class RoomService {
 
             Player player = playerOpt.get();
 
-            if (player.isSpectator()) {
+            if (player.getSpectator()) {
                 return ApiResponse.badRequest("观战者无法取消准备");
             }
 
