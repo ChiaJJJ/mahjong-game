@@ -22,7 +22,7 @@ import java.util.List;
 @Entity
 @Table(name = "game_configs", indexes = {
     @Index(name = "idx_config_name", columnList = "configName", unique = true),
-    @Index(name = "idx_is_default", columnList = "isDefault"),
+    @Index(name = "idx_bool_default", columnList = "boolDefault"),
     @Index(name = "idx_created_at", columnList = "createdAt")
 })
 @Data
@@ -143,8 +143,8 @@ public class GameConfig {
     /**
      * 是否为默认配置
      */
-    @Column(name = "default", nullable = false)
-    private Boolean default = false;
+    @Column(name = "bool_default", nullable = false)
+    private Boolean boolDefault = false;
 
     /**
      * 是否启用
@@ -259,14 +259,14 @@ public class GameConfig {
      * 检查是否为默认配置
      */
     public boolean isDefaultConfig() {
-        return isDefault != null && isDefault;
+        return boolDefault != null && boolDefault;
     }
 
     /**
      * 检查是否启用
      */
     public boolean isEnabledConfig() {
-        return isEnabled != null && isEnabled;
+        return enabled != null && enabled;
     }
 
     /**

@@ -144,21 +144,21 @@ public class PlayerRound {
      * 检查是否为胜者
      */
     public boolean isWinner() {
-        return isWinner != null && isWinner;
+        return winner != null && winner;
     }
 
     /**
      * 检查是否为庄家
      */
     public boolean isDealer() {
-        return isDealer != null && isDealer;
+        return dealer != null && dealer;
     }
 
     /**
      * 设置为胜者
      */
     public void setAsWinner(Integer fanCount) {
-        this.isWinner = true;
+        this.winner = true;
         this.fanCount = fanCount;
     }
 
@@ -166,7 +166,7 @@ public class PlayerRound {
      * 设置为庄家
      */
     public void setAsDealer() {
-        this.isDealer = true;
+        this.dealer = true;
     }
 
     /**

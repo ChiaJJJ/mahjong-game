@@ -148,7 +148,7 @@ public class RoomService {
                     return ApiResponse.badRequest("此房间不允许观战");
                 }
 
-                Player spectator = Player.builder()
+                Player spectatorPlayer = Player.builder()
                         .id(playerId)
                         .room(room)
                         .playerName(playerName)
@@ -159,7 +159,7 @@ public class RoomService {
                         .winsCount(0)
                         .build();
 
-                playerRepository.save(spectator);
+                playerRepository.save(spectatorPlayer);
 
                 // 更新观战人数
                 room.incrementSpectatorCount();
@@ -483,8 +483,9 @@ public class RoomService {
         List<Player> players = playerRepository.findActivePlayersByRoomId(room.getId());
 
         for (int position = 1; position <= room.getMaxPlayers(); position++) {
+            int finalPosition = position;
             boolean isOccupied = players.stream()
-                    .anyMatch(p -> p.getPlayerPosition().equals(position));
+                    .anyMatch(p -> p.getPlayerPosition().equals(finalPosition));
             if (!isOccupied) {
                 return position;
             }

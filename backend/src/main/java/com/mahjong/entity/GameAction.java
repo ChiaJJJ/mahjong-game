@@ -130,8 +130,8 @@ public class GameAction {
     /**
      * 是否有效操作
      */
-    @Column(name = "valid", nullable = false)
-    private Boolean valid = true;
+    @Column(name = "bool_valid", nullable = false)
+    private Boolean boolValid = true;
 
     /**
      * 是否为AI操作
@@ -375,14 +375,14 @@ public class GameAction {
      * 检查是否为有效操作
      */
     public boolean isValidAction() {
-        return isValid != null && isValid;
+        return boolValid != null && boolValid;
     }
 
     /**
      * 检查是否为AI操作
      */
     public boolean isAIAction() {
-        return isAiAction != null && isAiAction;
+        return aiAction != null && aiAction;
     }
 
     /**
@@ -425,7 +425,7 @@ public class GameAction {
      */
     public void setSuccess() {
         this.actionResult = ActionResult.SUCCESS;
-        this.isValid = true;
+        this.boolValid = true;
     }
 
     /**
@@ -434,7 +434,7 @@ public class GameAction {
     public void setFailed(String errorMessage) {
         this.actionResult = ActionResult.FAILED;
         this.errorMessage = errorMessage;
-        this.isValid = false;
+        this.boolValid = false;
     }
 
     /**
@@ -442,7 +442,7 @@ public class GameAction {
      */
     public void setTimeout() {
         this.actionResult = ActionResult.TIMEOUT;
-        this.isValid = false;
+        this.boolValid = false;
         this.errorMessage = "操作超时";
     }
 
@@ -466,7 +466,7 @@ public class GameAction {
                 .playerPosition(playerPosition)
                 .actionType(actionType)
                 .actionContent(actionContent)
-                .valid(true)
+                .boolValid(true)
                 .actionResult(ActionResult.SUCCESS)
                 .build();
     }
@@ -486,7 +486,7 @@ public class GameAction {
                 .roundNumber(gameRound != null ? gameRound.getRoundNumber() : 0)
                 .actionType(actionType)
                 .tileInfo(tileInfo)
-                .valid(true)
+                .boolValid(true)
                 .actionResult(ActionResult.SUCCESS)
                 .build();
     }
@@ -505,7 +505,7 @@ public class GameAction {
                 .actionType(actionType)
                 .targetPlayerId(targetPlayerId)
                 .targetPlayerName(targetPlayerName)
-                .valid(true)
+                .boolValid(true)
                 .actionResult(ActionResult.SUCCESS)
                 .build();
     }
