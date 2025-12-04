@@ -101,4 +101,35 @@ public interface GameConfigRepository extends JpaRepository<GameConfig, Long> {
            "LEFT JOIN Room r ON JSON_CONTAINS(r.gameConfig, gc.configName) " +
            "GROUP BY gc.configName")
     List<Object[]> getConfigUsageStats();
+
+    /**
+     * 根据配置名称模糊查询
+     */
+    List<GameConfig> findByConfigNameContaining(String configName);
+
+    /**
+     * 根据创建者查找配置
+     */
+    List<GameConfig> findByCreatedBy(String createdBy);
+
+    /**
+     * 查找启用的配置按使用次数排序
+     */
+    List<GameConfig> findByEnabledOrderByUsageCountDesc(Boolean enabled);
+
+    /**
+     * 查找启用的配置按创建时间排序
+     */
+    List<GameConfig> findByEnabledOrderByCreatedAtDesc(Boolean enabled);
+
+    /**
+     * 统计启用的配置数量
+     */
+    long countByEnabled(Boolean enabled);
+
+    /**
+     * 统计启用的公共配置数量
+     */
+    @Query("SELECT COUNT(gc) FROM GameConfig gc WHERE gc.enabled = :enabled AND gc.allowSpectate = :allowSpectate")
+    long countByEnabledAndAllowSpectate(@Param("enabled") Boolean enabled, @Param("allowSpectate") Boolean allowSpectate);
 }
