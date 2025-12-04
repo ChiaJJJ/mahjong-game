@@ -46,7 +46,7 @@ public interface PlayerRepository extends JpaRepository<Player, String> {
     /**
      * 根据房间ID和玩家ID查找玩家
      */
-    Optional<Player> findByRoomIdAndPlayerId(Long roomId, String playerId);
+    Optional<Player> findByRoomIdAndId(Long roomId, String Id);
 
     /**
      * 查找房间内准备状态的玩家数量
@@ -146,4 +146,9 @@ public interface PlayerRepository extends JpaRepository<Player, String> {
      */
     @Query("SELECT p.playerStatus, COUNT(p) FROM Player p WHERE p.room.id = :roomId GROUP BY p.playerStatus")
     List<Object[]> countPlayersByStatusInRoom(@Param("roomId") Long roomId);
+
+    /**
+     * 统计指定状态的玩家数量
+     */
+    long countByPlayerStatus(Player.PlayerStatus status);
 }

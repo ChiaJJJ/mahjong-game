@@ -21,10 +21,10 @@ import java.util.List;
  */
 @Entity
 @Table(name = "rooms", indexes = {
-    @Index(name = "idx_room_number", columnList = "roomNumber"),
-    @Index(name = "idx_creator_id", columnList = "creatorId"),
-    @Index(name = "idx_room_status", columnList = "roomStatus"),
-    @Index(name = "idx_created_at", columnList = "createdAt")
+    @Index(name = "idx_room_number", columnList = "room_number"),
+    @Index(name = "idx_creator_id", columnList = "creator_id"),
+    @Index(name = "idx_room_status", columnList = "room_status"),
+    @Index(name = "idx_created_at", columnList = "created_at")
 })
 @Data
 @Builder
@@ -50,6 +50,12 @@ public class Room {
      */
     @Column(name = "room_name", length = 50)
     private String roomName;
+
+    /**
+     * 房间密码（可选）
+     */
+    @Column(name = "password", length = 20)
+    private String password;
 
     /**
      * 创建者ID

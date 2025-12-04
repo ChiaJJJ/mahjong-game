@@ -1,5 +1,6 @@
 package com.mahjong.service;
 
+import com.mahjong.dto.response.RoomResponse;
 import com.mahjong.entity.GameConfig;
 import com.mahjong.entity.Player;
 import com.mahjong.entity.Room;
@@ -10,6 +11,7 @@ import com.mahjong.service.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,37 @@ public class RoomService {
     private final PlayerRepository playerRepository;
     private final GameConfigRepository gameConfigRepository;
 
+  
+    /**
+     * 将Room实体转换为RoomResponse DTO
+     */
+    public RoomResponse convertToRoomResponse(Room room) {
+        if (room == null) {
+            return null;
+        }
+
+        
+        return RoomResponse.builder()
+                .id(room.getId())
+                .roomNumber(room.getRoomNumber())
+                .roomName(room.getRoomName())
+                .creatorId(room.getCreatorId())
+                .creatorNickname("")
+                .roomStatus(room.getRoomStatus().toString())
+                .maxPlayers(room.getMaxPlayers())
+                .currentPlayers(room.getCurrentPlayers())
+                .spectatorCount(room.getSpectatorCount())
+                .hasPassword(false)
+                .allowSpectate(room.getAllowSpectate())
+                .isPublic(true)
+                .gameConfig(null)
+                .players(null)
+                .spectators(null)
+                .createdAt(room.getCreatedAt())
+                .expiresAt(room.getExpiresAt())
+                .build();
+    }
+
     /**
      * 创建房间
      *
@@ -42,11 +75,12 @@ public class RoomService {
      * @param creatorName 创建者昵称
      * @param configId    游戏配置ID
      * @param maxPlayers  最大玩家数
+     * @param password    房间密码（可选）
      * @return 创建的房间信息
      */
     @Transactional
     public ApiResponse<Room> createRoom(String roomName, String creatorId, String creatorName,
-                                      Long configId, Integer maxPlayers) {
+                                      Long configId, Integer maxPlayers, String password) {
         try {
             log.info("开始创建房间: 创建者={}, 房间名={}", creatorName, roomName);
 
@@ -69,6 +103,7 @@ public class RoomService {
             Room room = Room.builder()
                     .roomNumber(roomNumber)
                     .roomName(roomName)
+                    .password(password)
                     .creatorId(creatorId)
                     .maxPlayers(maxPlayers)
                     .currentPlayers(0)
@@ -115,11 +150,12 @@ public class RoomService {
      * @param roomNumber  房间号
      * @param playerId    玩家ID
      * @param playerName  玩家昵称
+     * @param password    房间密码（可选）
      * @param spectator 是否为观战者
      * @return 加入结果
      */
     @Transactional
-    public ApiResponse<Room> joinRoom(String roomNumber, String playerId, String playerName, Boolean spectator) {
+    public ApiResponse<Room> joinRoom(String roomNumber, String playerId, String playerName, String password, Boolean spectator) {
         try {
             log.info("玩家尝试加入房间: 玩家={}, 房间号={}", playerName, roomNumber);
 
@@ -136,8 +172,15 @@ public class RoomService {
                 return ApiResponse.badRequest("房间不可加入");
             }
 
+            // 验证房间密码
+            if (room.getPassword() != null && !room.getPassword().trim().isEmpty()) {
+                if (password == null || !room.getPassword().equals(password)) {
+                    return ApiResponse.badRequest("房间密码错误");
+                }
+            }
+
             // 检查是否已在房间中
-            Optional<Player> existingPlayerOpt = playerRepository.findByRoomIdAndPlayerId(room.getId(), playerId);
+            Optional<Player> existingPlayerOpt = playerRepository.findByRoomIdAndId(room.getId(), playerId);
             if (existingPlayerOpt.isPresent()) {
                 return ApiResponse.badRequest("您已在此房间中");
             }
@@ -165,6 +208,7 @@ public class RoomService {
                 room.incrementSpectatorCount();
                 roomRepository.save(room);
 
+  
                 log.info("观战者加入成功: 玩家={}, 房间号={}", playerName, roomNumber);
                 return ApiResponse.success("观战成功", room);
             }
@@ -197,6 +241,7 @@ public class RoomService {
             room.incrementPlayerCount();
             roomRepository.save(room);
 
+  
             log.info("玩家加入成功: 玩家={}, 位置={}, 房间号={}", playerName, position, roomNumber);
             return ApiResponse.success("加入房间成功", room);
 
@@ -227,7 +272,7 @@ public class RoomService {
             Room room = roomOpt.get();
 
             // 查找玩家
-            Optional<Player> playerOpt = playerRepository.findByRoomIdAndPlayerId(room.getId(), playerId);
+            Optional<Player> playerOpt = playerRepository.findByRoomIdAndId(room.getId(), playerId);
             if (playerOpt.isEmpty()) {
                 return ApiResponse.notFound("您不在此房间中");
             }
@@ -260,12 +305,101 @@ public class RoomService {
 
             roomRepository.save(room);
 
+    
             log.info("玩家离开成功: 玩家ID={}, 房间号={}", playerId, roomNumber);
             return ApiResponse.success("离开房间成功", "已成功离开房间");
 
         } catch (Exception e) {
             log.error("离开房间失败: ", e);
             return ApiResponse.error("离开房间失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 根据房间号获取房间
+     */
+    public Room getRoomByNumber(String roomNumber) {
+        Optional<Room> roomOpt = roomRepository.findByRoomNumber(roomNumber);
+        return roomOpt.orElse(null);
+    }
+
+    /**
+     * 设置玩家准备状态
+     */
+    @Transactional
+    public ApiResponse<Room> setPlayerReady(String roomNumber, String playerId, Boolean ready) {
+        try {
+            Optional<Room> roomOpt = roomRepository.findByRoomNumber(roomNumber);
+            if (roomOpt.isEmpty()) {
+                return ApiResponse.notFound("房间不存在");
+            }
+
+            Room room = roomOpt.get();
+            Optional<Player> playerOpt = playerRepository.findByRoomIdAndId(room.getId(), playerId);
+            if (playerOpt.isEmpty()) {
+                return ApiResponse.notFound("玩家不在此房间中");
+            }
+
+            Player player = playerOpt.get();
+            if (ready != null && ready) {
+                player.setReady();
+            } else {
+                player.setOnline();
+            }
+
+            playerRepository.save(player);
+            return ApiResponse.success("准备状态更新成功", room);
+        } catch (Exception e) {
+            log.error("设置玩家准备状态失败", e);
+            return ApiResponse.error("准备状态更新失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取房间列表
+     */
+    public ApiResponse<List<Room>> getRoomList(String status, Boolean needFull, int page, int size) {
+        try {
+            List<Room> rooms;
+            if ("active".equals(status)) {
+                rooms = roomRepository.findActiveRooms(LocalDateTime.now());
+            } else {
+                rooms = roomRepository.findAll();
+            }
+            return ApiResponse.success("获取房间列表成功", rooms);
+        } catch (Exception e) {
+            log.error("获取房间列表失败", e);
+            return ApiResponse.error("获取房间列表失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取用户所在房间
+     */
+    public ApiResponse<Room> getUserRoom(String userId) {
+        try {
+            Optional<Room> roomOpt = playerRepository.findRoomByPlayerId(userId);
+            if (roomOpt.isEmpty()) {
+                return ApiResponse.notFound("用户不在任何房间中");
+            }
+            return ApiResponse.success("获取用户房间成功", roomOpt.get());
+        } catch (Exception e) {
+            log.error("获取用户房间失败", e);
+            return ApiResponse.error("获取用户房间失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 清理过期房间
+     */
+    @Transactional
+    public ApiResponse<String> cleanupExpiredRooms() {
+        try {
+            cleanExpiredRooms();
+            return ApiResponse.success("清理过期房间成功");
+        } catch (Exception e) {
+            log.error("清理过期房间失败", e);
+            return ApiResponse.error("清理过期房间失败: " + e.getMessage());
         }
     }
 
@@ -330,7 +464,7 @@ public class RoomService {
 
             Room room = roomOpt.get();
 
-            Optional<Player> playerOpt = playerRepository.findByRoomIdAndPlayerId(room.getId(), playerId);
+            Optional<Player> playerOpt = playerRepository.findByRoomIdAndId(room.getId(), playerId);
             if (playerOpt.isEmpty()) {
                 return ApiResponse.notFound("您不在此房间中");
             }
@@ -375,7 +509,7 @@ public class RoomService {
 
             Room room = roomOpt.get();
 
-            Optional<Player> playerOpt = playerRepository.findByRoomIdAndPlayerId(room.getId(), playerId);
+            Optional<Player> playerOpt = playerRepository.findByRoomIdAndId(room.getId(), playerId);
             if (playerOpt.isEmpty()) {
                 return ApiResponse.notFound("您不在此房间中");
             }

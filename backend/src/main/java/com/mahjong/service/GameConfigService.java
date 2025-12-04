@@ -184,10 +184,10 @@ public class GameConfigService {
         Optional<GameConfig> configOpt = gameConfigRepository.findById(configId);
         if (configOpt.isPresent()) {
             GameConfig config = configOpt.get();
-            config.setUseCount(config.getUseCount() + 1);
+            config.setUsageCount(config.getUsageCount() + 1);
             config.setUpdatedAt(LocalDateTime.now());
             gameConfigRepository.save(config);
-            log.debug("配置使用次数增加: configId={}, useCount={}", configId, config.getUseCount());
+            log.debug("配置使用次数增加: configId={}, useCount={}", configId, config.getUsageCount());
         }
     }
 

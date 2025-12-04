@@ -4,7 +4,9 @@
       "Bash(mvn test:*)",
       "Bash(dir:*)",
       "Bash(find:*)",
-      "Bash(mvn compile:*)"
+      "Bash(mvn compile:*)",
+      "Bash(npm run build)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

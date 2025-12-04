@@ -21,9 +21,9 @@ import java.util.List;
  */
 @Entity
 @Table(name = "game_configs", indexes = {
-    @Index(name = "idx_config_name", columnList = "configName", unique = true),
-    @Index(name = "idx_bool_default", columnList = "boolDefault"),
-    @Index(name = "idx_created_at", columnList = "createdAt")
+    @Index(name = "idx_config_name", columnList = "config_name", unique = true),
+    @Index(name = "idx_bool_default", columnList = "bool_default"),
+    @Index(name = "idx_created_at", columnList = "created_at")
 })
 @Data
 @Builder

@@ -117,6 +117,8 @@
 <script setup>
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { ChatDotRound, User, Minus, Plus, ArrowDown } from '@element-plus/icons-vue'
+import { useChatStore } from '@/stores/chat'
+import { chatUtils } from '@/api/chat'
 
 // 定义组件属性
 const props = defineProps({
@@ -172,9 +174,11 @@ const props = defineProps({
 // 定义事件
 const emit = defineEmits(['message-sent', 'message-received', 'cleared', 'minimized'])
 
+// 使用聊天store
+const chatStore = useChatStore()
+
 // 响应式数据
 const messageList = ref(null)
-const messages = ref([])
 const newMessage = ref('')
 const showScrollToBottom = ref(false)
 const isScrolling = ref(false)
@@ -182,8 +186,14 @@ const scrollTimer = ref(null)
 
 // 计算属性
 const canSend = computed(() => {
-  return newMessage.value.trim().length > 0 && newMessage.value.trim().length <= props.maxLength
+  const content = newMessage.value.trim()
+  if (!content) return false
+
+  const validation = chatUtils.validateMessage(content)
+  return validation.valid && content.length <= props.maxLength
 })
+
+const messages = computed(() => chatStore.currentMessages)
 
 const quickReplies = computed(() => {
   return [
@@ -240,26 +250,26 @@ const formatMessage = (content) => {
 }
 
 // 事件处理
-const sendMessage = () => {
+const sendMessage = async () => {
   if (!canSend.value) return
 
-  const message = {
-    id: Date.now(),
-    sender: props.currentUser?.nickname || '匿名',
-    senderId: props.currentUser?.id,
-    content: newMessage.value.trim(),
-    type: 'user',
-    timestamp: new Date().toISOString(),
-    avatarUrl: props.currentUser?.avatarUrl
+  try {
+    await chatStore.sendMessage(newMessage.value.trim())
+
+    emit('message-sent', {
+      content: newMessage.value.trim(),
+      timestamp: new Date().toISOString()
+    })
+
+    newMessage.value = ''
+
+    nextTick(() => {
+      scrollToBottom()
+    })
+  } catch (error) {
+    console.error('发送消息失败:', error)
+    // 可以在这里显示错误提示
   }
-
-  messages.value.push(message)
-  emit('message-sent', message)
-  newMessage.value = ''
-
-  nextTick(() => {
-    scrollToBottom()
-  })
 }
 
 const sendQuickReply = (reply) => {
@@ -275,7 +285,7 @@ const handleKeyDown = (event) => {
 }
 
 const handleClearMessages = () => {
-  messages.value = []
+  chatStore.clearMessages()
   emit('cleared')
 }
 
@@ -309,27 +319,11 @@ const handleScroll = () => {
   }, 100)
 }
 
-// 添加系统消息
-const addSystemMessage = (content) => {
-  const message = {
-    id: Date.now(),
-    sender: '系统',
-    content,
-    type: 'system',
-    timestamp: new Date().toISOString()
-  }
-
-  messages.value.push(message)
-  nextTick(() => {
-    scrollToBottom()
-  })
-}
-
 // 监听消息变化
 watch(messages, () => {
   // 限制消息数量
   if (messages.value.length > props.maxMessages) {
-    messages.value = messages.value.slice(-props.maxMessages)
+    // 移除多余的消息（store中已经处理了）
   }
 
   nextTick(() => {
@@ -341,20 +335,31 @@ watch(messages, () => {
 
 // 生命周期钩子
 onMounted(() => {
+  // 初始化聊天功能
+  if (props.roomNumber) {
+    chatStore.joinRoom(props.roomNumber)
+  }
+
   nextTick(() => {
     scrollToBottom()
   })
 })
 
 onUnmounted(() => {
+  // 清理资源
   clearTimeout(scrollTimer.value)
+  if (props.roomNumber) {
+    chatStore.leaveRoom()
+  }
 })
 
 // 暴露方法给父组件
 defineExpose({
-  addSystemMessage,
+  sendMessage: chatStore.sendMessage,
+  addSystemMessage: chatStore.addSystemMessage,
   scrollToBottom,
-  messages
+  messages: chatStore.currentMessages,
+  clearMessages: chatStore.clearMessages
 })
 </script>
 

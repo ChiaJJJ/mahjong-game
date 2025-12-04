@@ -20,12 +20,12 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "game_actions", indexes = {
-    @Index(name = "idx_game_id", columnList = "gameId"),
-    @Index(name = "idx_player_id", columnList = "playerId"),
-    @Index(name = "idx_action_type", columnList = "actionType"),
-    @Index(name = "idx_round_number", columnList = "roundNumber"),
-    @Index(name = "idx_action_order", columnList = "actionOrder"),
-    @Index(name = "idx_created_at", columnList = "createdAt")
+    @Index(name = "idx_game_id", columnList = "game_id"),
+    @Index(name = "idx_player_id", columnList = "player_id"),
+    @Index(name = "idx_action_type", columnList = "action_type"),
+    @Index(name = "idx_round_number", columnList = "round_number"),
+    @Index(name = "idx_action_order", columnList = "action_order"),
+    @Index(name = "idx_created_at", columnList = "created_at")
 })
 @Data
 @Builder

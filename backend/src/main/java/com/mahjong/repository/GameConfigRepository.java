@@ -87,22 +87,6 @@ public interface GameConfigRepository extends JpaRepository<GameConfig, Long> {
     long countMixedTileEnabledConfigs();
 
     /**
-     * 查找热门配置（使用次数最多）
-     */
-    @Query(value = "SELECT gc.*, COUNT(r.id) as usage_count FROM game_configs gc " +
-                   "LEFT JOIN rooms r ON JSON_CONTAINS(r.game_config, JSON_QUOTE(gc.config_name), '$.configName') " +
-                   "GROUP BY gc.id ORDER BY usage_count DESC LIMIT 10", nativeQuery = true)
-    List<GameConfig> findPopularConfigs();
-
-    /**
-     * 查找配置的数量统计
-     */
-    @Query("SELECT gc.configName, COUNT(r.id) as usageCount FROM GameConfig gc " +
-           "LEFT JOIN Room r ON JSON_CONTAINS(r.gameConfig, gc.configName) " +
-           "GROUP BY gc.configName")
-    List<Object[]> getConfigUsageStats();
-
-    /**
      * 根据配置名称模糊查询
      */
     List<GameConfig> findByConfigNameContaining(String configName);

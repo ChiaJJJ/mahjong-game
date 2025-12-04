@@ -21,11 +21,11 @@ import java.util.List;
  */
 @Entity
 @Table(name = "game_rounds", indexes = {
-    @Index(name = "idx_game_id", columnList = "gameId"),
-    @Index(name = "idx_round_number", columnList = "roundNumber"),
-    @Index(name = "idx_round_status", columnList = "roundStatus"),
-    @Index(name = "idx_winner_position", columnList = "winnerPosition"),
-    @Index(name = "idx_created_at", columnList = "createdAt")
+    @Index(name = "idx_game_id", columnList = "game_id"),
+    @Index(name = "idx_round_number", columnList = "round_number"),
+    @Index(name = "idx_round_status", columnList = "round_status"),
+    @Index(name = "idx_winner_position", columnList = "winner_position"),
+    @Index(name = "idx_created_at", columnList = "created_at")
 })
 @Data
 @Builder

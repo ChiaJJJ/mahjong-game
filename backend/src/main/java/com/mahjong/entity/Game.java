@@ -21,10 +21,10 @@ import java.util.List;
  */
 @Entity
 @Table(name = "games", indexes = {
-    @Index(name = "idx_room_id", columnList = "roomId"),
-    @Index(name = "idx_game_status", columnList = "gameStatus"),
-    @Index(name = "idx_current_player", columnList = "currentPlayer"),
-    @Index(name = "idx_created_at", columnList = "createdAt")
+    @Index(name = "idx_room_id", columnList = "room_id"),
+    @Index(name = "idx_game_status", columnList = "game_status"),
+    @Index(name = "idx_current_player", columnList = "current_player"),
+    @Index(name = "idx_created_at", columnList = "created_at")
 })
 @Data
 @Builder

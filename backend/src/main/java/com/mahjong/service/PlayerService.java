@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -29,6 +30,252 @@ public class PlayerService {
 
     private final PlayerRepository playerRepository;
     private final RoomRepository roomRepository;
+
+    /**
+     * 根据ID获取玩家
+     */
+    public ApiResponse<Player> getPlayerById(String playerId) {
+        return getPlayerInfo(playerId);
+    }
+
+    /**
+     * 创建或更新玩家
+     */
+    @Transactional
+    public ApiResponse<Player> createOrUpdatePlayer(String playerId, String nickname, String avatar, String device) {
+        try {
+            Optional<Player> playerOpt = playerRepository.findById(playerId);
+            Player player;
+
+            if (playerOpt.isPresent()) {
+                // 更新现有玩家
+                player = playerOpt.get();
+                if (nickname != null) {
+                    player.setPlayerName(nickname);
+                }
+                if (avatar != null) {
+                    player.setPlayerAvatar(avatar);
+                }
+            } else {
+                // 创建新玩家
+                player = Player.builder()
+                    .id(playerId)
+                    .playerName(nickname)
+                    .playerAvatar(avatar)
+                    .playerStatus(Player.PlayerStatus.ONLINE)
+                    .totalScore(0)
+                    .winsCount(0)
+                    .build();
+            }
+
+            playerRepository.save(player);
+            return ApiResponse.success("操作成功", player);
+        } catch (Exception e) {
+            log.error("创建或更新玩家失败", e);
+            return ApiResponse.error("操作失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 更新玩家状态
+     */
+    @Transactional
+    public ApiResponse<Void> updatePlayerStatus(String playerId, Boolean isOnline, String status) {
+        try {
+            Optional<Player> playerOpt = playerRepository.findById(playerId);
+            if (playerOpt.isEmpty()) {
+                return ApiResponse.notFound("玩家不存在");
+            }
+
+            Player player = playerOpt.get();
+            if (isOnline != null) {
+                if (isOnline) {
+                    player.setOnline();
+                } else {
+                    player.setOffline();
+                }
+            }
+
+            playerRepository.save(player);
+            return ApiResponse.success("状态更新成功", null);
+        } catch (Exception e) {
+            log.error("更新玩家状态失败", e);
+            return ApiResponse.error("状态更新失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 更新玩家昵称
+     */
+    @Transactional
+    public ApiResponse<Player> updatePlayerNickname(String playerId, String nickname) {
+        try {
+            Optional<Player> playerOpt = playerRepository.findById(playerId);
+            if (playerOpt.isEmpty()) {
+                return ApiResponse.notFound("玩家不存在");
+            }
+
+            Player player = playerOpt.get();
+            player.setPlayerName(nickname);
+            playerRepository.save(player);
+
+            return ApiResponse.success("昵称更新成功", player);
+        } catch (Exception e) {
+            log.error("更新玩家昵称失败", e);
+            return ApiResponse.error("昵称更新失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 更新玩家头像并返回玩家对象
+     */
+    @Transactional
+    public ApiResponse<Player> updatePlayerAvatarWithPlayer(String playerId, String avatarUrl) {
+        try {
+            ApiResponse<String> result = updatePlayerAvatar(playerId, avatarUrl);
+            if (!result.isSuccess()) {
+                return ApiResponse.error(result.getMessage());
+            }
+
+            // 返回更新后的玩家对象
+            Optional<Player> playerOpt = playerRepository.findById(playerId);
+            if (playerOpt.isEmpty()) {
+                return ApiResponse.notFound("玩家不存在");
+            }
+
+            return ApiResponse.success("头像更新成功", playerOpt.get());
+        } catch (Exception e) {
+            log.error("更新玩家头像失败", e);
+            return ApiResponse.error("头像更新失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 更新玩家分数
+     */
+    @Transactional
+    public ApiResponse<Player> updatePlayerScore(String playerId, Integer score) {
+        try {
+            Optional<Player> playerOpt = playerRepository.findById(playerId);
+            if (playerOpt.isEmpty()) {
+                return ApiResponse.notFound("玩家不存在");
+            }
+
+            Player player = playerOpt.get();
+            if (score != null) {
+                player.setTotalScore(score);
+            }
+            playerRepository.save(player);
+
+            return ApiResponse.success("分数更新成功", player);
+        } catch (Exception e) {
+            log.error("更新玩家分数失败", e);
+            return ApiResponse.error("分数更新失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取在线玩家列表
+     */
+    public ApiResponse<List<Player>> getOnlinePlayers(int page, int size) {
+        try {
+            List<Player> onlinePlayers = playerRepository.findByPlayerStatus(Player.PlayerStatus.ONLINE);
+            // 简单的分页处理
+            int start = (page - 1) * size;
+            int end = Math.min(start + size, onlinePlayers.size());
+
+            if (start >= onlinePlayers.size()) {
+                return ApiResponse.success("获取在线玩家成功", List.of());
+            }
+
+            List<Player> pagedPlayers = onlinePlayers.subList(start, end);
+            return ApiResponse.success("获取在线玩家成功", pagedPlayers);
+        } catch (Exception e) {
+            log.error("获取在线玩家失败", e);
+            return ApiResponse.error("获取在线玩家失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 搜索玩家
+     */
+    public ApiResponse<List<Player>> searchPlayers(String keyword, int page, int size) {
+        try {
+            List<Player> allPlayers = playerRepository.findAll();
+            List<Player> matchedPlayers = allPlayers.stream()
+                .filter(p -> p.getPlayerName() != null &&
+                           p.getPlayerName().toLowerCase().contains(keyword.toLowerCase()))
+                .collect(java.util.stream.Collectors.toList());
+
+            // 分页处理
+            int start = (page - 1) * size;
+            int end = Math.min(start + size, matchedPlayers.size());
+
+            if (start >= matchedPlayers.size()) {
+                return ApiResponse.success("搜索玩家成功", List.of());
+            }
+
+            List<Player> pagedPlayers = matchedPlayers.subList(start, end);
+            return ApiResponse.success("搜索玩家成功", pagedPlayers);
+        } catch (Exception e) {
+            log.error("搜索玩家失败", e);
+            return ApiResponse.error("搜索玩家失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 清理离线玩家
+     */
+    @Transactional
+    public ApiResponse<String> cleanupOfflinePlayers(Integer offlineThresholdMinutes) {
+        try {
+            cleanInactivePlayers();
+            return ApiResponse.success("离线玩家清理完成");
+        } catch (Exception e) {
+            log.error("清理离线玩家失败", e);
+            return ApiResponse.error("清理离线玩家失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取玩家统计概览
+     */
+    public ApiResponse<Object> getPlayerStatsOverview() {
+        try {
+            long totalPlayers = playerRepository.count();
+            long onlinePlayers = playerRepository.countByPlayerStatus(Player.PlayerStatus.ONLINE);
+            long offlinePlayers = playerRepository.countByPlayerStatus(Player.PlayerStatus.OFFLINE);
+
+            Object overview = Map.of(
+                "totalPlayers", totalPlayers,
+                "onlinePlayers", onlinePlayers,
+                "offlinePlayers", offlinePlayers,
+                "onlinePercentage", totalPlayers > 0 ? (double) onlinePlayers / totalPlayers * 100 : 0.0
+            );
+            return ApiResponse.success("获取玩家统计概览成功", overview);
+        } catch (Exception e) {
+            log.error("获取玩家统计概览失败", e);
+            return ApiResponse.error("获取统计概览失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取玩家统计信息
+     */
+    public ApiResponse<Object> getGameStats() {
+        try {
+            long totalPlayers = playerRepository.count();
+            Object stats = Map.of(
+                "totalPlayers", totalPlayers,
+                "onlinePlayers", playerRepository.countByPlayerStatus(Player.PlayerStatus.ONLINE),
+                "offlinePlayers", playerRepository.countByPlayerStatus(Player.PlayerStatus.OFFLINE)
+            );
+            return ApiResponse.success("获取统计成功", stats);
+        } catch (Exception e) {
+            log.error("获取游戏统计失败", e);
+            return ApiResponse.error("获取统计失败: " + e.getMessage());
+        }
+    }
 
     /**
      * 获取玩家信息

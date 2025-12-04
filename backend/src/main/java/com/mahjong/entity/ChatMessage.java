@@ -18,10 +18,10 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "chat_messages", indexes = {
-    @Index(name = "idx_room_id", columnList = "roomId"),
-    @Index(name = "idx_sender_id", columnList = "senderId"),
-    @Index(name = "idx_message_type", columnList = "messageType"),
-    @Index(name = "idx_created_at", columnList = "createdAt")
+    @Index(name = "idx_room_id", columnList = "room_id"),
+    @Index(name = "idx_sender_id", columnList = "sender_id"),
+    @Index(name = "idx_message_type", columnList = "message_type"),
+    @Index(name = "idx_created_at", columnList = "created_at")
 })
 @Data
 @Builder

@@ -21,13 +21,13 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "players",
     indexes = {
-        @Index(name = "idx_room_id", columnList = "roomId"),
-        @Index(name = "idx_player_name", columnList = "playerName"),
-        @Index(name = "idx_player_status", columnList = "playerStatus"),
-        @Index(name = "idx_last_active_at", columnList = "lastActiveAt")
+        @Index(name = "idx_room_id", columnList = "room_id"),
+        @Index(name = "idx_player_name", columnList = "player_name"),
+        @Index(name = "idx_player_status", columnList = "player_status"),
+        @Index(name = "idx_last_active_at", columnList = "last_active_at")
     },
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_room_position", columnNames = {"roomId", "playerPosition"})
+        @UniqueConstraint(name = "uk_room_position", columnNames = {"room_id", "player_position"})
     }
 )
 @Data
